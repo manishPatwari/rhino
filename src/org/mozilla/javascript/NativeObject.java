@@ -152,16 +152,20 @@ public class NativeObject extends IdScriptableObject implements Map
             return thisObj;
 
           case Id_hasOwnProperty: {
-            boolean result;
-            Object arg = args.length < 1 ? Undefined.instance : args[0];
-            String s = ScriptRuntime.toStringIdOrIndex(cx, arg);
-            if (s == null) {
-                int index = ScriptRuntime.lastIndexResult(cx);
-                result = thisObj.has(index, thisObj);
-            } else {
-                result = thisObj.has(s, thisObj);
-            }
-            return ScriptRuntime.wrapBoolean(result);
+              boolean result;
+              Object arg = args.length < 1 ? Undefined.instance : args[0];
+              if (arg instanceof Symbol) {
+                  result = ensureSymbolScriptable(thisObj).has((Symbol) arg, thisObj);
+              } else {
+                  String s = ScriptRuntime.toStringIdOrIndex(cx, arg);
+                  if (s == null) {
+                      int index = ScriptRuntime.lastIndexResult(cx);
+                      result = thisObj.has(index, thisObj);
+                  } else {
+                      result = thisObj.has(s, thisObj);
+                  }
+              }
+              return ScriptRuntime.wrapBoolean(result);
           }
 
           case Id_propertyIsEnumerable: {
